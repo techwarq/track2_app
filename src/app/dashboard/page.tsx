@@ -1,23 +1,23 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation'; // Import useRouter
-import { fetchProjects, Project } from '../actions/backend'; // Adjust the import path to your backend.ts file
+import { useRouter } from 'next/navigation'; 
+import { fetchProjects, Project } from '../actions/backend'; 
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 
 export default function Dashboard() {
-  const [repos, setRepos] = useState<Project[]>([]); // Use Project[] type here
+  const [repos, setRepos] = useState<Project[]>([]); 
   const [error, setError] = useState<string | null>(null);
   const [userId, setUserId] = useState<string | null>(null);
-  const router = useRouter(); // Initialize router
+  const router = useRouter(); 
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const userIdParam = params.get('userId');
     if (userIdParam) {
       setUserId(userIdParam);
-      fetchRepos(userIdParam); // Pass userIdParam here
+      fetchRepos(userIdParam); 
     } else {
       setError('No userId found in URL.');
     }
@@ -25,8 +25,8 @@ export default function Dashboard() {
 
   const fetchRepos = async (userId: string) => {
     try {
-      const projects = await fetchProjects(userId); // You can modify this function to accept userId if needed
-      setRepos(projects); // Set repos state to the fetched projects
+      const projects = await fetchProjects(userId); 
+      setRepos(projects); 
       setError(null);
     } catch (error) {
       console.error('Error fetching repositories:', error);
@@ -40,7 +40,7 @@ export default function Dashboard() {
       setError('No userId available. Please refresh the page or re-authenticate.');
       return;
     }
-    // Navigate to the new route with selected repo
+    
     router.push(`/dashboard/devlogs?repo=${encodeURIComponent(repo)}&userId=${encodeURIComponent(userId)}`);
   };
 
