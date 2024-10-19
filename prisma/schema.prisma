@@ -1,0 +1,66 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+
+model Commit {
+  id        Int      @id @default(autoincrement())
+  sha       String   @unique
+  message   String
+  author    String
+  date      DateTime
+  repoFullName String
+}
+
+model User {
+  id          Int      @id @default(autoincrement())
+  githubToken String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model PullRequest {
+  id          Int      @id @default(autoincrement())
+  title       String
+  description String
+  createdAt   DateTime @default(now())
+  closedAt    DateTime?
+  repo        Repo     @relation(fields: [repoId], references: [id])
+  repoId      Int
+   pullRequestSummary PullRequestSummary[]
+}
+
+model Repo {
+  id           Int           @id @default(autoincrement())
+  fullName     String        @unique
+  pullRequests PullRequest[]
+}
+model CommitSummary {
+  id           Int      @id @default(autoincrement())
+  repoFullName String
+  name         String
+  description  String   @db.Text
+  tags         String[] // Array of tags
+  generatedAt  DateTime
+}
+
+model PullRequestSummary {
+  id              Int          @id @default(autoincrement())
+  pullRequest     PullRequest  @relation(fields: [pullRequestId], references: [id])
+  pullRequestId   Int
+  name            String
+  description     String       @db.Text
+  tags            String[]     // Array of tags
+  generatedAt     DateTime     @default(now())
+}
