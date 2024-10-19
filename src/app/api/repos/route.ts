@@ -1,11 +1,10 @@
 import {  NextResponse } from 'next/server';
-import { PrismaClient } from '@prisma/client';
+import { redis, connectToRedis } from '@/app/lib/redis';
+import { prisma } from '@/app/lib/prisma';
+
 import { repositories } from '@/const';
 import axios from 'axios';
-import { createClient } from 'redis';
 
-const prisma = new PrismaClient();
-const redisClient = createClient({ url: process.env.REDIS_URL });
 
 
 
@@ -35,14 +34,14 @@ const saveRepoDetails = async (owner: string, name: string) => {
 };
 
 export async function GET() {
-    await redisClient.connect();
+    await connectToRedis();
   try {
     const repoDetails = await Promise.all(
       repositories.map(async (repo) => {
         const cacheKey = `repoDetails:${repo.owner}/${repo.name}`;
         
         // Check cache first
-        const cachedData = await redisClient.get(cacheKey);
+        const cachedData = await redis.get(cacheKey);
         if (cachedData) {
           console.log('Returning cached data for:', cacheKey);
           return JSON.parse(cachedData); // Return cached data if available
@@ -64,7 +63,7 @@ export async function GET() {
         };
 
         // Cache the result
-        await redisClient.set(cacheKey, JSON.stringify(repoDetail), {
+        await redis.set(cacheKey, JSON.stringify(repoDetail), {
           EX: 3600, // Cache expiration time in seconds (1 hour)
         });
 

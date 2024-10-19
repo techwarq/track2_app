@@ -1,33 +1,30 @@
 import { NextResponse } from 'next/server';
 import { summarizeCommits } from '@/app/aisum';
-import { PrismaClient } from '@prisma/client';
-import { createClient } from 'redis';
-
-const prisma = new PrismaClient();
-const redisClient = createClient({ url: process.env.REDIS_URL });
-
-
+import { redis, connectToRedis } from '@/app/lib/redis';
+import { prisma } from '@/app/lib/prisma';
 
 export async function GET(request: Request) {
-    await redisClient.connect();
-  const { searchParams } = new URL(request.url);
-  console.log('Full request URL:', request.url);
-  const repoParam = searchParams.get('repo');
-  const userId = searchParams.get('userId');
-
-  if (!repoParam || !userId) {
-    console.log('Invalid repo or userId:', repoParam, userId);
-    return NextResponse.json({ error: 'Invalid repo or userId parameter' }, { status: 400 });
-  }
-
-  // Split the repoParam into owner and repo
-  const [owner, repo] = repoParam.split('/');
-  if (!owner || !repo) {
-    console.log('Invalid repo format:', repoParam);
-    return NextResponse.json({ error: 'Invalid repo format' }, { status: 400 });
-  }
-
   try {
+    // Connect to Redis at the start
+    await connectToRedis();
+    
+    const { searchParams } = new URL(request.url);
+    console.log('Full request URL:', request.url);
+    const repoParam = searchParams.get('repo');
+    const userId = searchParams.get('userId');
+
+    if (!repoParam || !userId) {
+      console.log('Invalid repo or userId:', repoParam, userId);
+      return NextResponse.json({ error: 'Invalid repo or userId parameter' }, { status: 400 });
+    }
+
+    // Split the repoParam into owner and repo
+    const [owner, repo] = repoParam.split('/');
+    if (!owner || !repo) {
+      console.log('Invalid repo format:', repoParam);
+      return NextResponse.json({ error: 'Invalid repo format' }, { status: 400 });
+    }
+
     console.log('Fetching user from database...');
     const user = await prisma.user.findUnique({
       where: { id: parseInt(userId) },
@@ -40,7 +37,7 @@ export async function GET(request: Request) {
 
     // Check Redis cache for existing summaries
     const cacheKey = `commitSummaries:${repoParam}`;
-    const cachedSummaries = await redisClient.get(cacheKey);
+    const cachedSummaries = await redis.get(cacheKey);
     if (cachedSummaries) {
       console.log('Returning cached commit summaries for:', cacheKey);
       return NextResponse.json(JSON.parse(cachedSummaries));
@@ -57,10 +54,10 @@ export async function GET(request: Request) {
     if (existingSummaries.length > 0) {
       console.log('Found existing commit summaries. Returning them...');
       // Cache the existing summaries for future requests
-      await redisClient.set(cacheKey, JSON.stringify(existingSummaries), {
+      await redis.set(cacheKey, JSON.stringify(existingSummaries), {
         EX: 3600, // Cache expiration time in seconds (1 hour)
       });
-      return NextResponse.json(existingSummaries); // Return existing summaries if they exist
+      return NextResponse.json(existingSummaries);
     }
 
     // Step 2: Fetch commits from the database
@@ -108,19 +105,23 @@ export async function GET(request: Request) {
     }));
 
     // Cache the newly created summaries
-    await redisClient.set(cacheKey, JSON.stringify(savedSummaries), {
+    await redis.set(cacheKey, JSON.stringify(savedSummaries), {
       EX: 3600, // Cache expiration time in seconds (1 hour)
     });
 
-    return NextResponse.json(savedSummaries); // Return the saved summaries
+    return NextResponse.json(savedSummaries);
   } catch (error) {
     console.error('Error in /api/dashboard/summarize route:', error);
     if (error instanceof Error) {
       console.error('Error message:', error.message);
       console.error('Error stack:', error.stack);
     }
-    return NextResponse.json({ error: 'Failed to summarize commits', details: 'Check server logs for more information' }, { status: 500 });
-  } finally {
-    await prisma.$disconnect(); // Ensure proper disconnection from Prisma
+    return NextResponse.json(
+      { 
+        error: 'Failed to summarize commits', 
+        details: 'Check server logs for more information' 
+      }, 
+      { status: 500 }
+    );
   }
 }

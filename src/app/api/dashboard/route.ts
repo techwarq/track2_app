@@ -1,10 +1,7 @@
 import { NextResponse } from "next/server";
 import axios from "axios";
-import { PrismaClient } from '@prisma/client';
-import { createClient } from 'redis';
-
-const prisma = new PrismaClient();
-const redisClient = createClient({ url: process.env.REDIS_URL });
+import { redis, connectToRedis } from '@/app/lib/redis';
+import { prisma } from '@/app/lib/prisma';
 
 
 
@@ -26,7 +23,7 @@ export const GET = async (req: Request) => {
 
   const url = new URL(req.url);
   const userId = url.searchParams.get('userId');
-  await redisClient.connect();
+  await connectToRedis();
 
   if (!userId) {
     return NextResponse.json({ error: 'Missing userId' }, { status: 400 });
@@ -43,7 +40,7 @@ export const GET = async (req: Request) => {
 
     // Check Redis cache for repositories
     const cacheKey = `githubRepos:${userId}`;
-    const cachedRepos = await redisClient.get(cacheKey);
+    const cachedRepos = await redis.get(cacheKey);
 
     if (cachedRepos) {
       console.log('Returning cached repositories for userId:', userId);
@@ -65,7 +62,7 @@ export const GET = async (req: Request) => {
     }));
 
     // Cache the repositories in Redis
-    await redisClient.set(cacheKey, JSON.stringify(repos), {
+    await redis.set(cacheKey, JSON.stringify(repos), {
       EX: 3600, // Cache expiration time in seconds (1 hour)
     });
 

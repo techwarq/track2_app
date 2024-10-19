@@ -1,8 +1,6 @@
 import { NextResponse } from "next/server";
 import axios from "axios";
-import { PrismaClient } from '@prisma/client';
-
-const prisma = new PrismaClient();
+import { prisma } from '@/app/lib/prisma';
 
 export const GET = async (req: Request) => {
   // Get the URL from the request

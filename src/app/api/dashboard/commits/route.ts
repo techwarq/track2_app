@@ -1,9 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { PrismaClient } from '@prisma/client';
+
 import axios from 'axios';
 import { createClient } from 'redis';
+import { prisma } from '@/app/lib/prisma';
 
-const prisma = new PrismaClient();
+
 const redisClient = createClient({ url: process.env.REDIS_URL });
 
  
