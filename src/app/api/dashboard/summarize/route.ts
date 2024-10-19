@@ -5,7 +5,7 @@ import { prisma } from '@/app/lib/prisma';
 
 export async function GET(request: Request) {
   try {
-    // Connect to Redis at the start
+  
     await connectToRedis();
     
     const { searchParams } = new URL(request.url);
@@ -18,7 +18,7 @@ export async function GET(request: Request) {
       return NextResponse.json({ error: 'Invalid repo or userId parameter' }, { status: 400 });
     }
 
-    // Split the repoParam into owner and repo
+    
     const [owner, repo] = repoParam.split('/');
     if (!owner || !repo) {
       console.log('Invalid repo format:', repoParam);
@@ -35,7 +35,7 @@ export async function GET(request: Request) {
       return NextResponse.json({ error: 'User not found' }, { status: 404 });
     }
 
-    // Check Redis cache for existing summaries
+    
     const cacheKey = `commitSummaries:${repoParam}`;
     const cachedSummaries = await redis.get(cacheKey);
     if (cachedSummaries) {
@@ -43,7 +43,7 @@ export async function GET(request: Request) {
       return NextResponse.json(JSON.parse(cachedSummaries));
     }
 
-    // Step 1: Check if a summarization for this repo already exists in the database
+    
     console.log('Checking for existing commit summaries...');
     const existingSummaries = await prisma.commitSummary.findMany({
       where: {
@@ -53,14 +53,14 @@ export async function GET(request: Request) {
 
     if (existingSummaries.length > 0) {
       console.log('Found existing commit summaries. Returning them...');
-      // Cache the existing summaries for future requests
+      
       await redis.set(cacheKey, JSON.stringify(existingSummaries), {
-        EX: 3600, // Cache expiration time in seconds (1 hour)
+        EX: 3600, 
       });
       return NextResponse.json(existingSummaries);
     }
 
-    // Step 2: Fetch commits from the database
+    
     console.log('Fetching commits from database...');
     const commits = await prisma.commit.findMany({
       where: {
@@ -74,7 +74,7 @@ export async function GET(request: Request) {
 
     console.log('Number of commits fetched from the database:', commits.length);
 
-    // Step 3: Format the commits for summarization
+    
     const formattedCommits = commits.map(commit => ({
       sha: commit.sha,
       commit: {
@@ -89,7 +89,7 @@ export async function GET(request: Request) {
     console.log('Summarizing commits...');
     const summaries = await summarizeCommits(formattedCommits);
 
-    // Step 4: Save the summaries in the database
+    
     const savedSummaries = await Promise.all(summaries.map(async (summary) => {
       const commitSummary = await prisma.commitSummary.create({
         data: {
@@ -104,9 +104,8 @@ export async function GET(request: Request) {
       return commitSummary;
     }));
 
-    // Cache the newly created summaries
     await redis.set(cacheKey, JSON.stringify(savedSummaries), {
-      EX: 3600, // Cache expiration time in seconds (1 hour)
+      EX: 3600, 
     });
 
     return NextResponse.json(savedSummaries);

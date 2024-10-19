@@ -64,11 +64,11 @@ const DeveloperPage: React.FC = () => {
   };
 
   const handleAuth = () => {
-    // Redirecting to the backend auth URL
+   
     window.location.href = `api/auth`;
   };
 
-  // Handle the authentication state
+
   if (!isAuthenticated) {
     return (
       <div className="container mx-auto p-4">

@@ -3,7 +3,7 @@ import axios from "axios";
 import { prisma } from '@/app/lib/prisma';
 
 export const GET = async (req: Request) => {
-  // Get the URL from the request
+  
   const url = new URL(req.url);
   const code = url.searchParams.get('code');
 
@@ -20,7 +20,7 @@ export const GET = async (req: Request) => {
   const opts = { headers: { accept: 'application/json' } };
 
   try {
-    // Step 1: Exchange the code for an access token
+    
     const response = await axios.post('https://github.com/login/oauth/access_token', body, opts);
     const { access_token } = response.data;
 
@@ -31,19 +31,18 @@ export const GET = async (req: Request) => {
 
     console.log('Access token obtained successfully');
 
-    // Step 2: Save the token in the database
+   
     const user = await prisma.user.create({
       data: {
         githubToken: access_token,
       },
     });
 
-    // Step 3: Redirect to frontend dashboard
     const frontendUrl = `https://www.trackk.tech/dashboard?userId=${user.id}&token=${access_token}`;
 
     console.log('Redirecting to frontend dashboard:', frontendUrl);
 
-    // Step 4: Redirect user to frontend dashboard
+   
     return NextResponse.redirect(frontendUrl);
     
   } catch (error) {

@@ -53,7 +53,7 @@ export const fetchCommitsAndSummarize = async (
   try {
     const repoFullName = `${owner}/${repo}`;
 
-    // Fetch commits
+   
     const commitsResponse = await axios.get('/api/dashboard/commits/', {
       params: {
         repo: repoFullName,
@@ -62,7 +62,7 @@ export const fetchCommitsAndSummarize = async (
     });
     const commits: Commit[] = commitsResponse.data;
 
-    // Fetch summaries
+   
     const summariesResponse = await axios.get('/api/dashboard/summarize/', {
       params: {
         repo: repoFullName,
@@ -85,11 +85,11 @@ export const fetchChangelog = async (owner: string, repo: string, userId: string
   try {
     
     
-    // Fetch commits and summaries to ensure they are up-to-date
+    
     const { summaries } = await fetchCommitsAndSummarize(owner, repo, userId);
     
-    // Return the fetched summaries directly
-    return Array.isArray(summaries) ? summaries : [];// No need to fetch changelog from another API
+  
+    return Array.isArray(summaries) ? summaries : [];
   } catch (error) {
     console.error('Error fetching changelog:', error);
     throw new Error('Failed to fetch changelog');
@@ -99,21 +99,20 @@ export const fetchChangelog = async (owner: string, repo: string, userId: string
 
 export const fetchRepos = async (): Promise<Repository[]> => {
   try {
-    // Since you have the repositories defined statically, you may not need to fetch them from an API.
-    // If you're fetching from an API, this is where you would do it:
+    
     const response = await axios.get('/api/repos');
     
-    // Log the response to see its structure
+    
     console.log('Fetched repositories response:', response.data);
     
-    // Map the fetched data to the Repository interface format
+    
     return response.data.map((repo: {
       timeAgo: number;
       lastUpdate: number; owner: string; name: string 
 }) => ({
       owner: repo.owner,
       name: repo.name,
-      lastUpdate: repo.lastUpdate, // Include lastUpdate
+      lastUpdate: repo.lastUpdate, 
       timeAgo: repo.timeAgo,
     }));
   } catch (error) {
@@ -124,10 +123,10 @@ export const fetchRepos = async (): Promise<Repository[]> => {
 
 export const fetchPullRequestSum = async (owner: string, repo: string): Promise< Summarization[] > => {
   try {
-    // Construct the URL using the owner and repo parameters
+    
     const response = await axios.get(`/api/repos/${owner}/${repo}/changelogs`);
     
-    // Assuming the response contains the summarized pull requests
+   
     return response.data;
   } catch (error) {
     console.error('Error fetching pull request summaries:', error);

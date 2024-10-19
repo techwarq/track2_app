@@ -8,12 +8,12 @@ import axios from 'axios';
 
 
 
-// Function to fetch the last commit for a repository
+
 const fetchLastCommit = async (owner: string, name: string) => {
   try {
     const response = await axios.get(`https://api.github.com/repos/${owner}/${name}/commits`);
     if (response.data && response.data.length > 0) {
-      return response.data[0]; // Get the most recent commit
+      return response.data[0]; 
     }
     return null;
   } catch (error) {
@@ -22,7 +22,7 @@ const fetchLastCommit = async (owner: string, name: string) => {
   }
 };
 
-// Save repository details to the database
+
 const saveRepoDetails = async (owner: string, name: string) => {
   const repoFullName = `${owner}/${name}`;
   const repo = await prisma.repo.upsert({
@@ -40,17 +40,17 @@ export async function GET() {
       repositories.map(async (repo) => {
         const cacheKey = `repoDetails:${repo.owner}/${repo.name}`;
         
-        // Check cache first
+        
         const cachedData = await redis.get(cacheKey);
         if (cachedData) {
           console.log('Returning cached data for:', cacheKey);
-          return JSON.parse(cachedData); // Return cached data if available
+          return JSON.parse(cachedData); 
         }
 
         const repoId = await saveRepoDetails(repo.owner, repo.name);
         const lastCommit = await fetchLastCommit(repo.owner, repo.name);
 
-        // Prepare the response
+       
         const lastUpdate = lastCommit ? new Date(lastCommit.commit.author.date) : null;
         const timeAgo = lastUpdate ? calculateTimeAgo(lastUpdate) : 'Unknown';
 
@@ -62,9 +62,9 @@ export async function GET() {
           timeAgo,
         };
 
-        // Cache the result
+        
         await redis.set(cacheKey, JSON.stringify(repoDetail), {
-          EX: 3600, // Cache expiration time in seconds (1 hour)
+          EX: 3600, 
         });
 
         return repoDetail;
@@ -80,7 +80,7 @@ export async function GET() {
   }
 }
 
-// Helper function to calculate time ago
+
 const calculateTimeAgo = (date: Date): string => {
   const seconds = Math.floor((new Date().getTime() - date.getTime()) / 1000);
   let interval = Math.floor(seconds / 31536000);

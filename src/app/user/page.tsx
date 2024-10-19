@@ -78,7 +78,7 @@ const User: React.FC = () => {
     return (
       <div className="flex justify-center items-center h-screen">
         <img
-          src="assets/Bat Png.png" // Update this with the correct path to your bat image
+          src="assets/Bat Png.png" 
           alt="Loading Bat"
           className="w-32 h-32 animate-spinner transform-gpu"
         />
