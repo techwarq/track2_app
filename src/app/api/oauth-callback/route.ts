@@ -39,7 +39,7 @@ export const GET = async (req: Request) => {
     });
 
     // Step 3: Redirect to frontend dashboard
-    const frontendUrl = `http://localhost:3001/dashboard?userId=${user.id}&token=${access_token}`;
+    const frontendUrl = `https://www.trackk.tech/dashboard?userId=${user.id}&token=${access_token}`;
 
     console.log('Redirecting to frontend dashboard:', frontendUrl);
 
