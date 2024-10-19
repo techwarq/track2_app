@@ -13,7 +13,7 @@ export default function Header() {
 
                 {/* GitHub Button */}
                 <div className=" md:flex ml-auto">
-                    <Link href="https://github.com/techwarq/change_log_ui" className="bg-white/20 text-white font-bold py-2 px-4 rounded-full transition-all mr-4">
+                    <Link href="https://github.com/techwarq/track2_app" className="bg-white/20 text-white font-bold py-2 px-4 rounded-full transition-all mr-4">
                         GitHub
                     </Link>
                 </div>
