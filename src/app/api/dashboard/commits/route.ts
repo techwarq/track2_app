@@ -1,11 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
 
 import axios from 'axios';
-import { createClient } from 'redis';
+import { redis, connectToRedis } from '@/app/lib/redis';
 import { prisma } from '@/app/lib/prisma';
 
 
-const redisClient = createClient({ url: process.env.REDIS_URL });
+
 
  
 
@@ -31,7 +31,7 @@ interface GitHubCommit {
 }
 
 export async function GET(req: NextRequest) {
-    await redisClient.connect();
+    await connectToRedis();
   console.log('Received request for commits');
 
   const searchParams = req.nextUrl.searchParams;
@@ -67,7 +67,7 @@ export async function GET(req: NextRequest) {
 
     // Check cache first
     const cacheKey = `commits:${owner}/${repo}?since=${since}`;
-    const cachedCommits = await redisClient.get(cacheKey);
+    const cachedCommits = await redis.get(cacheKey);
     if (cachedCommits) {
       console.log('Returning cached commits for:', cacheKey);
       return NextResponse.json(JSON.parse(cachedCommits));
@@ -142,7 +142,7 @@ export async function GET(req: NextRequest) {
     await Promise.all(upsertPromises);
 
     // Cache the commits for future requests
-    await redisClient.set(cacheKey, JSON.stringify(commits), {
+    await redis.set(cacheKey, JSON.stringify(commits), {
       EX: 3600, // Cache expiration time in seconds (1 hour)
     });
 

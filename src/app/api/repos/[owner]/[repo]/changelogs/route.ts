@@ -55,7 +55,7 @@ export async function GET(req: NextRequest, { params }: { params: { owner: strin
     let pullRequests: GitHubPullRequest[] = [];
     if (recentPRs.length === 0) {
       // Fetch from GitHub if no recent PRs
-      const response = await axios.get<GitHubPullRequest[]>(`https://api.github.com/repos/${owner}/${repo}/pulls`, {
+      const response = await axios.get<GitHubPullRequest[]>(`https://api.github.com/repos/${owner}/${repo}/pulls?state=closed`, {
         params: { state: 'closed', per_page: 5 },
       });
       pullRequests = response.data;
