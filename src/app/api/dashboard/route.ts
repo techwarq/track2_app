@@ -6,7 +6,7 @@ import { createClient } from 'redis';
 const prisma = new PrismaClient();
 const redisClient = createClient({ url: process.env.REDIS_URL });
 
-redisClient.connect();
+
 
 interface GithubRepo {
   id: number;
@@ -23,8 +23,10 @@ interface GithubRepo {
 }
 
 export const GET = async (req: Request) => {
+
   const url = new URL(req.url);
   const userId = url.searchParams.get('userId');
+  await redisClient.connect();
 
   if (!userId) {
     return NextResponse.json({ error: 'Missing userId' }, { status: 400 });

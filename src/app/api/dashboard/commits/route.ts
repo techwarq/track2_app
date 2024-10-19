@@ -6,7 +6,7 @@ import { createClient } from 'redis';
 const prisma = new PrismaClient();
 const redisClient = createClient({ url: process.env.REDIS_URL });
 
- redisClient.connect();
+ 
 
 interface GitHubRepo {
   default_branch: string;
@@ -30,6 +30,7 @@ interface GitHubCommit {
 }
 
 export async function GET(req: NextRequest) {
+    await redisClient.connect();
   console.log('Received request for commits');
 
   const searchParams = req.nextUrl.searchParams;

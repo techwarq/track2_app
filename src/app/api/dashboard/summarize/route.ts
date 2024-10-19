@@ -6,9 +6,10 @@ import { createClient } from 'redis';
 const prisma = new PrismaClient();
 const redisClient = createClient({ url: process.env.REDIS_URL });
 
-redisClient.connect();
+
 
 export async function GET(request: Request) {
+    await redisClient.connect();
   const { searchParams } = new URL(request.url);
   console.log('Full request URL:', request.url);
   const repoParam = searchParams.get('repo');

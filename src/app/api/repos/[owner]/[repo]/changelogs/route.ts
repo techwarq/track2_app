@@ -7,7 +7,7 @@ import { createClient } from 'redis';
 const prisma = new PrismaClient();
 const redisClient = createClient({ url: process.env.REDIS_URL });
 
-redisClient.connect();
+
 
 // Type definition for GitHub PR
 interface GitHubPullRequest {
@@ -18,6 +18,7 @@ interface GitHubPullRequest {
 
 export async function GET(req: NextRequest, { params }: { params: { owner: string; repo: string } }) {
   const { owner, repo } = params;
+  await redisClient.connect();
 
   if (!owner || !repo) {
     return NextResponse.json({ error: 'Owner or repo parameter missing' }, { status: 400 });

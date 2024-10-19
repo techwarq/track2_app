@@ -7,7 +7,7 @@ import { createClient } from 'redis';
 const prisma = new PrismaClient();
 const redisClient = createClient({ url: process.env.REDIS_URL });
 
-redisClient.connect();
+
 
 // Function to fetch the last commit for a repository
 const fetchLastCommit = async (owner: string, name: string) => {
@@ -35,6 +35,7 @@ const saveRepoDetails = async (owner: string, name: string) => {
 };
 
 export async function GET() {
+    await redisClient.connect();
   try {
     const repoDetails = await Promise.all(
       repositories.map(async (repo) => {
