@@ -35,7 +35,7 @@ export async function GET(req: NextRequest) {
   console.log('Received request for commits');
 
   const searchParams = req.nextUrl.searchParams;
-  const repoParam = searchParams.get('repo'); // The full "owner/repo" string
+  const repoParam = searchParams.get('repo'); 
   const userId = searchParams.get('userId');
   const since = searchParams.get('since') || '2019-05-06T00:00:00Z';
 
@@ -46,7 +46,7 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: 'Invalid repo or userId parameter' }, { status: 400 });
   }
 
-  // Split the repoParam into owner and repo
+
   const [owner, repo] = repoParam.split('/');
   
   if (!owner || !repo) {
@@ -65,7 +65,7 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ error: 'User not found' }, { status: 404 });
     }
 
-    // Check cache first
+  
     const cacheKey = `commits:${owner}/${repo}?since=${since}`;
     const cachedCommits = await redis.get(cacheKey);
     if (cachedCommits) {
@@ -73,7 +73,7 @@ export async function GET(req: NextRequest) {
       return NextResponse.json(JSON.parse(cachedCommits));
     }
 
-    // Step 1: Fetch repository details to get the default branch
+    
     console.log('Fetching repository details...');
     const repoResponse = await axios.get<GitHubRepo>(
       `https://api.github.com/repos/${owner}/${repo}`,
@@ -85,7 +85,7 @@ export async function GET(req: NextRequest) {
     );
     const defaultBranch = repoResponse.data.default_branch;
 
-    // Step 2: Fetch the SHA of the default branch
+
     console.log('Fetching default branch SHA...');
     const branchResponse = await axios.get<GitHubBranch>(
       `https://api.github.com/repos/${owner}/${repo}/branches/${defaultBranch}`,
@@ -97,7 +97,7 @@ export async function GET(req: NextRequest) {
     );
     const sha = branchResponse.data.commit.sha;
 
-    // Step 3: Fetch commits using the SHA
+    
     console.log('Fetching commits from GitHub...');
     const commitsResponse = await axios.get<GitHubCommit[]>(
       `https://api.github.com/repos/${owner}/${repo}/commits`,
@@ -122,7 +122,7 @@ export async function GET(req: NextRequest) {
       repoFullName: `${owner}/${repo}`,
     }));
 
-    // Step 4: Save commits in the database
+   
     console.log('Saving commits to database...');
     const upsertPromises = commits.map(commit => 
       prisma.commit.upsert({
@@ -138,12 +138,12 @@ export async function GET(req: NextRequest) {
       })
     );
 
-    // Execute all upsert operations concurrently
+    
     await Promise.all(upsertPromises);
 
-    // Cache the commits for future requests
+   
     await redis.set(cacheKey, JSON.stringify(commits), {
-      EX: 3600, // Cache expiration time in seconds (1 hour)
+      EX: 3600, 
     });
 
     console.log('Sending response...');
