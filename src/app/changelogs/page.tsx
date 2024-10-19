@@ -38,7 +38,7 @@ const ChangelogPage: React.FC = () => {
     if (owner && repo) {
       const fetchChangelogs = async () => {
         try {
-          // Use the fetchPullRequestSum function to get the changelogs
+         
           const pullRequestSummaries = await fetchPullRequestSum(owner, repo);
           setChangelogs(pullRequestSummaries);
           setError(null);
@@ -58,7 +58,7 @@ const ChangelogPage: React.FC = () => {
     return (
       <div className="flex justify-center items-center h-screen">
         <img
-          src="assets/Bat Png.png" // Update this with the correct path to your bat image
+          src="assets/Bat Png.png" 
           alt="Loading Bat"
           className=" w-32 h-32 animate-spinner transform-gpu"
         />
@@ -77,7 +77,7 @@ const ChangelogPage: React.FC = () => {
         {changelogs.map((changelog, index) => (
           <Card key={index} className="flex items-start justify-start pt-3 mb-4 bg-gray-700 text-white border-gray-700 rounded-lg shadow-lg overflow-hidden">
             <div className="ml-3 flex flex-col items-center justify-center ">
-              {/* You can add an icon or any other information here */}
+             
             </div>
             <div className="flex grow flex-col justify-between">
               <div className="flex items-start p-3 py-0">
