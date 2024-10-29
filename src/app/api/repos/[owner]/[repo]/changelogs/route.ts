@@ -12,6 +12,7 @@ interface GitHubPullRequest {
   title: string;
   body: string | null;
   closed_at: string | null;
+  number: number;
 }
 
 export async function GET(req: NextRequest, { params }: { params: { owner: string; repo: string } }) {
@@ -70,6 +71,7 @@ export async function GET(req: NextRequest, { params }: { params: { owner: strin
               description: pr.body || 'No description',
               repoId: repoRecord?.id || 0,
               closedAt: pr.closed_at ? new Date(pr.closed_at) : null,
+              number: pr.number,
             },
           })
         )
@@ -79,6 +81,8 @@ export async function GET(req: NextRequest, { params }: { params: { owner: strin
         title: pr.title,
         body: pr.description,
         closed_at: pr.closedAt?.toISOString() || null,
+        number: pr.number,
+
       }));
     }
 
