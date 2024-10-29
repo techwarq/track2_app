@@ -7,10 +7,6 @@ import { PrismaClient } from '@prisma/client';
 
 
 
-<<<<<<< HEAD
-=======
-
->>>>>>> 2660182481c71ff5f530e74013ffa58a3fef10f7
 const prisma = new PrismaClient();
 
 export interface GitHubCommitData {
@@ -76,17 +72,10 @@ export const summarizeCommits = async (commits: GitHubCommitData[]): Promise<Com
     for (const commit of recentCommits) {
       console.log(`Summarizing commit with sha: ${commit.sha}`);
 
-<<<<<<< HEAD
-     
-      const commitMessage = commit.commit.message;
-
-      
-=======
       
       const commitMessage = commit.commit.message;
 
      
->>>>>>> 2660182481c71ff5f530e74013ffa58a3fef10f7
       const result = await chain.invoke({
         commit: commitMessage,
         format_instructions: parser.getFormatInstructions(),
@@ -94,11 +83,7 @@ export const summarizeCommits = async (commits: GitHubCommitData[]): Promise<Com
 
       console.log(`Received summary for commit ${commit.sha}:`, result);
 
-<<<<<<< HEAD
-      
-=======
      
->>>>>>> 2660182481c71ff5f530e74013ffa58a3fef10f7
       commitSummaries.push(result);
     }
 
@@ -144,19 +129,11 @@ export const summarizePullRequests = async (repoId: number): Promise<PRSummary[]
   console.log(`Starting summarization of 5 most recent closed pull requests for repo ID: ${repoId}`);
 
   try {
-<<<<<<< HEAD
-    
-    const pullRequests = await prisma.pullRequest.findMany({
-      where: { 
-        repoId,
-         
-=======
 
     const pullRequests = await prisma.pullRequest.findMany({
       where: { 
         repoId,
         
->>>>>>> 2660182481c71ff5f530e74013ffa58a3fef10f7
       },
       
       take: 5 
@@ -172,11 +149,7 @@ export const summarizePullRequests = async (repoId: number): Promise<PRSummary[]
     for (const pr of pullRequests) {
       console.log(`Summarizing pull request titled: ${pr.title}`);
 
-<<<<<<< HEAD
-      
-=======
      
->>>>>>> 2660182481c71ff5f530e74013ffa58a3fef10f7
       const result = await chain2.invoke({
         prTitle: pr.title,
         prDescription: pr.description,
@@ -185,11 +158,7 @@ export const summarizePullRequests = async (repoId: number): Promise<PRSummary[]
 
       console.log(`Received summary for pull request ${pr.title}:`, result);
 
-<<<<<<< HEAD
-      
-=======
    
->>>>>>> 2660182481c71ff5f530e74013ffa58a3fef10f7
       const prSummary: PRSummary = {
         name: result.name || pr.title,
         description: result.description || 'No description available',
