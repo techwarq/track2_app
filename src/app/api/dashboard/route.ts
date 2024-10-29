@@ -38,7 +38,7 @@ export const GET = async (req: Request) => {
       return NextResponse.json({ error: 'User not found' }, { status: 404 });
     }
 
-   
+
     const cacheKey = `githubRepos:${userId}`;
     const cachedRepos = await redis.get(cacheKey);
 
@@ -61,7 +61,7 @@ export const GET = async (req: Request) => {
       default_branch: repo.default_branch,
     }));
 
-    
+
     await redis.set(cacheKey, JSON.stringify(repos), {
       EX: 3600, 
     });

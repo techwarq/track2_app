@@ -38,7 +38,7 @@ const ChangelogPage: React.FC = () => {
     if (owner && repo) {
       const fetchChangelogs = async () => {
         try {
-          
+
           const pullRequestSummaries = await fetchPullRequestSum(owner, repo);
           setChangelogs(pullRequestSummaries);
           setError(null);

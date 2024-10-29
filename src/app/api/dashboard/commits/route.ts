@@ -46,7 +46,7 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: 'Invalid repo or userId parameter' }, { status: 400 });
   }
 
-  
+
   const [owner, repo] = repoParam.split('/');
   
   if (!owner || !repo) {
@@ -65,7 +65,9 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ error: 'User not found' }, { status: 404 });
     }
 
-    
+
+  
+
     const cacheKey = `commits:${owner}/${repo}?since=${since}`;
     const cachedCommits = await redis.get(cacheKey);
     if (cachedCommits) {
@@ -84,6 +86,7 @@ export async function GET(req: NextRequest) {
       }
     );
     const defaultBranch = repoResponse.data.default_branch;
+
 
     console.log('Fetching default branch SHA...');
     const branchResponse = await axios.get<GitHubBranch>(
@@ -121,7 +124,7 @@ export async function GET(req: NextRequest) {
       repoFullName: `${owner}/${repo}`,
     }));
 
-    
+   
     console.log('Saving commits to database...');
     const upsertPromises = commits.map(commit => 
       prisma.commit.upsert({
@@ -137,10 +140,10 @@ export async function GET(req: NextRequest) {
       })
     );
 
-  
+    
     await Promise.all(upsertPromises);
 
-  
+   
     await redis.set(cacheKey, JSON.stringify(commits), {
       EX: 3600, 
     });

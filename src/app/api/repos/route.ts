@@ -13,7 +13,10 @@ const fetchLastCommit = async (owner: string, name: string) => {
   try {
     const response = await axios.get(`https://api.github.com/repos/${owner}/${name}/commits`);
     if (response.data && response.data.length > 0) {
+
       return response.data[0]; 
+
+
     }
     return null;
   } catch (error) {
@@ -40,7 +43,7 @@ export async function GET() {
       repositories.map(async (repo) => {
         const cacheKey = `repoDetails:${repo.owner}/${repo.name}`;
         
-        
+
         const cachedData = await redis.get(cacheKey);
         if (cachedData) {
           console.log('Returning cached data for:', cacheKey);
@@ -50,7 +53,6 @@ export async function GET() {
         const repoId = await saveRepoDetails(repo.owner, repo.name);
         const lastCommit = await fetchLastCommit(repo.owner, repo.name);
 
-       
         const lastUpdate = lastCommit ? new Date(lastCommit.commit.author.date) : null;
         const timeAgo = lastUpdate ? calculateTimeAgo(lastUpdate) : 'Unknown';
 
@@ -62,7 +64,7 @@ export async function GET() {
           timeAgo,
         };
 
-        
+
         await redis.set(cacheKey, JSON.stringify(repoDetail), {
           EX: 3600, 
         });

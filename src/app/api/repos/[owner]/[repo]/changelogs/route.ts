@@ -26,7 +26,7 @@ export async function GET(req: NextRequest, { params }: { params: { owner: strin
   const cacheKey = `pullRequests:${owner}/${repo}`;
   
   try {
-   
+    // Check cache first
     const cachedData = await redis.get(cacheKey);
     if (cachedData) {
       console.log('Returning cached data');
@@ -45,7 +45,7 @@ export async function GET(req: NextRequest, { params }: { params: { owner: strin
       });
     }
 
-    
+    // Fetch recent PRs (last 24 hours) from the database
     const recentPRs = await prisma.pullRequest.findMany({
       where: {
         repoId: repoRecord?.id || 0,
@@ -55,7 +55,7 @@ export async function GET(req: NextRequest, { params }: { params: { owner: strin
 
     let pullRequests: GitHubPullRequest[] = [];
     if (recentPRs.length === 0) {
-     
+      // Fetch from GitHub if no recent PRs
       const response = await axios.get<GitHubPullRequest[]>(`https://api.github.com/repos/${owner}/${repo}/pulls?state=closed`, {
         params: { state: 'closed', per_page: 5 },
       });
@@ -86,7 +86,7 @@ export async function GET(req: NextRequest, { params }: { params: { owner: strin
       }));
     }
 
-   
+    // Summarize pull requests using AI
     if (repoRecord?.id) {
       const summarizedPullRequests = await summarizePullRequests(repoRecord.id);
 
